@@ -1,5 +1,4 @@
-import SVG from './svg';
-
+var SVG = require('./svg');
 var ITF = require('./itf');
 
 class Boleto {
