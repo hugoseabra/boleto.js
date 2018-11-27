@@ -36,7 +36,6 @@
     "browserify": "^13.0.0",
     "browserify-banner": "1.0.8",
     "chai": "^3.5.0",
-    "codeclimate-test-reporter": "^0.4.0",
     "istanbul": "^1.1.0-alpha",
     "jsdom": "9.6.0",
     "jsdom-global": "2.1.0",
