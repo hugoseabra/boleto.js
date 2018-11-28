@@ -4,7 +4,9 @@ module.exports = function(config) {
     files: [
       'test/*_test.js',
     ],
+    reporters: ['progress', 'coverage'],
     preprocessors: {
+      'src/**/*.js': ['coverage'],
       'test/*_test.js': ['webpack'],
     },
     webpack: {
