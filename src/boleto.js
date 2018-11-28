@@ -1,5 +1,36 @@
-var SVG = require('./svg');
-var ITF = require('./itf');
+const SVG = require('./svg');
+const ITF = require('./itf');
+
+/**
+ * Calculates the modulo 11 checksum digit
+ *
+ * The specifications of the algorithm can be found at
+ * https://portal.febraban.org.br/pagina/3166/33/pt-br/layour-arrecadacao
+ *
+ * @params {Array|String} digits
+ * @return {Integer} The modulo 11 checksum digit
+ *
+ * @example
+ * // Returns 7
+ * modulo11('123456789');
+ */
+function modulo11(number) {
+  let digits = number;
+
+  if (typeof digits === 'string') {
+    digits = digits.split('');
+  }
+
+  digits.reverse();
+
+  let sum = 0;
+
+  for (let i = 0; i < digits.length; i += 1) {
+    sum += ((i % 8) + 2) * digits[i];
+  }
+
+  return (11 - (sum % 11)) % 10 || 1;
+}
 
 class Boleto {
   /**
@@ -29,8 +60,8 @@ class Boleto {
   valid() {
     if (this.bankSlipNumber.length !== 47) return false;
 
-    var barcodeDigits = this.barcode().split('');
-    var checksum = barcodeDigits.splice(4, 1);
+    const barcodeDigits = this.barcode().split('');
+    const checksum = barcodeDigits.splice(4, 1);
 
     return (modulo11(barcodeDigits).toString() === checksum.toString());
   }
@@ -48,7 +79,7 @@ class Boleto {
   barcode() {
     return this.bankSlipNumber.replace(
       /^(\d{4})(\d{5})\d{1}(\d{10})\d{1}(\d{10})\d{1}(\d{15})$/,
-      '$1$5$2$3$4'
+      '$1$5$2$3$4',
     );
   }
 
@@ -70,7 +101,7 @@ class Boleto {
   prettyNumber() {
     return this.bankSlipNumber.replace(
       /^(\d{5})(\d{5})(\d{5})(\d{6})(\d{5})(\d{6})(\d{1})(\d{14})$/,
-      '$1.$2 $3.$4 $5.$6 $7 $8'
+      '$1.$2 $3.$4 $5.$6 $7 $8',
     );
   }
 
@@ -86,31 +117,34 @@ class Boleto {
    * @return {String} The bank name
    */
   bank() {
-    switch (this.barcode().substr(0, 3)) {
-      case '001': return 'Banco do Brasil';
-      case '007': return 'BNDES';
-      case '033': return 'Santander';
-      case '069': return 'Crefisa';
-      case '077': return 'Banco Inter';
-      case '102': return 'XP Investimentos';
-      case '104': return 'Caixa Econômica Federal';
-      case '140': return 'Easynvest';
-      case '197': return 'Stone';
-      case '208': return 'BTG Pactual';
-      case '212': return 'Banco Original';
-      case '237': return 'Bradesco';
-      case '260': return 'Nu Pagamentos';
-      case '341': return 'Itaú';
-      case '389': return 'Banco Mercantil do Brasil';
-      case '422': return 'Banco Safra';
-      case '505': return 'Credit Suisse';
-      case '633': return 'Banco Rendimento';
-      case '652': return 'Itaú Unibanco';
-      case '735': return 'Banco Neon';
-      case '739': return 'Banco Cetelem';
-      case '745': return 'Citibank';
-      default:    return 'Unknown';
-    }
+    /* eslint-disable quote-props */
+    const banks = {
+      '001': 'Banco do Brasil',
+      '007': 'BNDES',
+      '033': 'Santander',
+      '069': 'Crefisa',
+      '077': 'Banco Inter',
+      '102': 'XP Investimentos',
+      '104': 'Caixa Econômica Federal',
+      '140': 'Easynvest',
+      '197': 'Stone',
+      '208': 'BTG Pactual',
+      '212': 'Banco Original',
+      '237': 'Bradesco',
+      '260': 'Nu Pagamentos',
+      '341': 'Itaú',
+      '389': 'Banco Mercantil do Brasil',
+      '422': 'Banco Safra',
+      '505': 'Credit Suisse',
+      '633': 'Banco Rendimento',
+      '652': 'Itaú Unibanco',
+      '735': 'Banco Neon',
+      '739': 'Banco Cetelem',
+      '745': 'Citibank',
+    };
+    /* eslint-enable quote-props */
+
+    return banks[this.barcode().substr(0, 3)] || 'Unknown';
   }
 
   /**
@@ -124,7 +158,7 @@ class Boleto {
   currency() {
     switch (this.barcode()[3]) {
       case '9': return { code: 'BRL', symbol: 'R$', decimal: ',' };
-      default:  return 'Unknown';
+      default: return 'Unknown';
     }
   }
 
@@ -150,8 +184,8 @@ class Boleto {
    * @return {Date} The expiration date of the bank slip
    */
   expirationDate() {
-    var refDate = new Date('1997-10-07');
-    var days = this.barcode().substr(5, 4);
+    const refDate = new Date('1997-10-07');
+    const days = this.barcode().substr(5, 4);
 
     return new Date(refDate.getTime() + days * 86400000);
   }
@@ -171,13 +205,13 @@ class Boleto {
    * @return {String} The bank slip's formatted amount
    */
   prettyAmount() {
-    var currency = this.currency();
+    const currency = this.currency();
 
     if (currency === 'Unknown') {
       return this.amount();
     }
 
-    return currency.symbol + ' ' + this.amount().replace('.', currency.decimal);
+    return `${currency.symbol} ${this.amount().replace('.', currency.decimal)}`;
   }
 
   /**
@@ -189,38 +223,9 @@ class Boleto {
    * @see {@link SVG#render}
    */
   toSVG(selector) {
-    var stripes = ITF.encode(this.barcode());
+    const stripes = ITF.encode(this.barcode());
     return new SVG(stripes).render(selector);
   }
-}
-
-/**
- * Calculates the modulo 11 checksum digit
- *
- * The specifications of the algorithm can be found at
- * https://portal.febraban.org.br/pagina/3166/33/pt-br/layour-arrecadacao
- *
- * @params {Array|String} digits
- * @return {Integer} The modulo 11 checksum digit
- *
- * @example
- * // Returns 7
- * modulo11('123456789');
- */
-function modulo11(digits) {
-  if (typeof digits === 'string') {
-    digits = digits.split('');
-  }
-
-  digits.reverse();
-
-  var sum = 0;
-
-  for (var i = 0; i < digits.length; i++) {
-    sum += (i % 8 + 2) * digits[i];
-  }
-
-  return (11 - (sum % 11)) % 10 || 1;
 }
 
 module.exports = Boleto;

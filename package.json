@@ -6,6 +6,7 @@
   "scripts": {
     "build-dev": "webpack --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js",
+    "lint": "eslint --cache src/**/*.js",
     "test": "karma start"
   },
   "repository": {
@@ -24,7 +25,13 @@
     "url": "https://github.com/guilhermearaujo/boleto.js/issues"
   },
   "homepage": "https://github.com/guilhermearaujo/boleto.js#readme",
+  "dependencies": {
+    "xmlserializer": "^0.6.1"
+  },
   "devDependencies": {
+    "eslint": "^5.9.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
     "jasmine": "^3.3.0",
     "jsdom": "^13.0.0",
     "jsdom-global": "^3.0.0",
@@ -33,7 +40,6 @@
     "karma-jsdom-launcher": "^6.1.4",
     "karma-webpack": "^3.0.5",
     "webpack": "^4.26.1",
-    "webpack-cli": "^3.1.2",
-    "xmlserializer": "^0.6.0"
+    "webpack-cli": "^3.1.2"
   }
 }
